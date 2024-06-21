@@ -1,0 +1,58 @@
+version: '3.8'
+services:
+  database:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB:       "bstock"
+    volumes:
+        - ./init.sql:/docker-entrypoint-initdb.d/1-init.sql
+        - ./data.sql:/docker-entrypoint-initdb.d/2-data.sql
+    networks:
+      backend:
+        aliases:
+          - "database"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  configserver:
+    image: bstock/configserver:0.0.1-SNAPSHOT
+    ports:
+       - "8071:8071"
+    environment:
+      ENCRYPT_KEY: "jimsecretkey"
+    networks:
+      backend:
+        aliases:
+          - "configserver"
+  bookservice:
+    image: bstock/book-service:0.0.1-SNAPSHOT
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_CONFIG_IMPORT=configserver:http://configserver:8071 
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "pgadmin@example.com"
+      PGADMIN_DEFAULT_PASSWORD: "pgadmin"
+    networks:
+      - backend
+networks:
+  backend:
+    driver: bridge

@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: native, git
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config
+          order: 1
+        git:
+          uri: https://github.com/rueyjium/spring-cloud-config-repo.git
+          order: 2 
+    
+server:
+  port: 8071
+  
+encrypt:
+  key: jimsecretkey 
+
+
+#Enable all Spring Boot Actuator endpoints.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+        
+yamllab:
+  case1: 'abc/\n'
+  case2: "abc/\n"     
+  case3: abc/\n
+  case4: 123
+  case5: '123'
+  case6:
+  case7: '{}:[],&*#?|-<>=!%\@'
+     
