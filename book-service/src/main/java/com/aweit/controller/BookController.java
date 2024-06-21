@@ -27,15 +27,15 @@ public class BookController {
 	@RequestMapping(value="/{bookId}",method = RequestMethod.GET)
 	public ResponseEntity<Book> getBook( @PathVariable("authorId") String authorId,
 			@PathVariable("bookId") String bookId) {
-		
-		Book book = bookService.getBook(bookId, authorId);
+
+		Book book = bookService.getBook(bookId, authorId, "feign");
 		book.add( 
 				linkTo(methodOn(BookController.class).getBook(authorId, book.getBookId())).withSelfRel(),
 				linkTo(methodOn(BookController.class).createBook(book)).withRel("createBook"),
 				linkTo(methodOn(BookController.class).updateBook(book)).withRel("updateBook"),
 				linkTo(methodOn(BookController.class).deleteBook(book.getBookId())).withRel("deleteBook")
-		);
-		
+				);
+
 		return ResponseEntity.ok(book);
 	}
 
