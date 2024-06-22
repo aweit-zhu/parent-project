@@ -28,6 +28,7 @@
 		<module>eurekaserver</module>
 		<module>book-service</module>
 		<module>author-service</module>
+		<module>gatewayserver</module>
 	</modules>
 	
 	<build>
