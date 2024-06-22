@@ -30,6 +30,19 @@ services:
       backend:
         aliases:
           - "configserver"
+  eurekaserver:
+    image: bstock/eurekaserver:0.0.1-SNAPSHOT
+    ports:
+      - "8070:8070"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started  
+    networks:
+      backend:
+        aliases:
+          - "eurekaserver"
   bookservice:
     image: bstock/book-service:0.0.1-SNAPSHOT
     environment:
@@ -53,19 +66,6 @@ services:
       PGADMIN_DEFAULT_PASSWORD: "pgadmin"
     networks:
       - backend
-  eurekaserver:
-    image: bstock/eurekaserver:0.0.1-SNAPSHOT
-    ports:
-      - "8070:8070"
-    depends_on:
-      database:
-        condition: service_healthy
-      configserver:
-        condition: service_started  
-    networks:
-      backend:
-        aliases:
-          - "eurekaserver"
   authorservice:
     image: bstock/author-service:0.0.1-SNAPSHOT
     environment:

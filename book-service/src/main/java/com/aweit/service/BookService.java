@@ -1,7 +1,13 @@
 package com.aweit.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -12,6 +18,13 @@ import com.aweit.repository.BookRepository;
 import com.aweit.service.client.AuthorDiscoveryClient;
 import com.aweit.service.client.AuthorFeignClient;
 import com.aweit.service.client.AuthorRestTemplateClient;
+import com.aweit.utils.UserContextHolder;
+
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead.Type;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 
 @Service
 public class BookService {
@@ -30,6 +43,8 @@ public class BookService {
 
 	@Autowired
 	AuthorDiscoveryClient authorDiscoveryClient;
+	
+	private static final Logger logger = LoggerFactory.getLogger(BookService.class);
 
 	public Book getBook(String bookId, String authorId, String clientType) {
 		Book book = bookRepo.findByAuthorIdAndBookId(authorId, bookId);
@@ -49,6 +64,7 @@ public class BookService {
 		return book;
 	}
 	
+	@CircuitBreaker(name = "authorService")
 	private Author retrieveAuthorInfo(String authorId, String clientType) {
 		Author author = null;
 
@@ -92,5 +108,43 @@ public class BookService {
 		responseMessage = String.format(messages.getMessage("book.delete.message", null, null), bookId);
 		return responseMessage;
 
+	}
+	
+	@CircuitBreaker(name = "bookService", fallbackMethod = "buildFallbackBookList")
+	@RateLimiter(name = "bookService", fallbackMethod = "buildFallbackBookList")
+	@Retry(name = "retryBookService", fallbackMethod = "buildFallbackBookList")
+	@Bulkhead(name = "bulkheadBookService", type= Type.THREADPOOL, fallbackMethod = "buildFallbackBookList")
+	public List<Book> getBooksByAuthor(String authorId) throws TimeoutException {
+		logger.debug("BookService Correlation id: {}",
+				UserContextHolder.getContext().getCorrelationId());
+		longRunRandomly();
+		return bookRepo.findByAuthorId(authorId);
+	}
+
+	@SuppressWarnings("unused")
+	private List<Book> buildFallbackBookList(String authorId, Throwable t){
+		List<Book> fallbackList = new ArrayList<>();
+		Book book = new Book();
+		book.setBookId("0000000-00-00000");
+		book.setAuthorId(authorId);
+		book.setProductName("No book information is currently available");
+		fallbackList.add(book);
+		return fallbackList;
+	}
+
+	private static void longRunRandomly() throws TimeoutException{
+		int max = 3;
+		int min = 1;
+		int randomNum = new Random().nextInt((max - min + 1) + min);
+		if (randomNum==3) sleep();
+	}
+	private static void sleep() throws TimeoutException{
+		try {
+			System.out.println("Sleeping....zzz");
+			Thread.sleep(5000);
+			throw new java.util.concurrent.TimeoutException();
+		} catch (InterruptedException e) {
+			logger.error(e.getMessage());
+		}
 	}
 }

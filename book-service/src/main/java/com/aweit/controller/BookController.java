@@ -3,6 +3,11 @@ package com.aweit.controller;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import java.util.List;
+import java.util.concurrent.TimeoutException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,11 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.aweit.model.Book;
 import com.aweit.service.BookService;
+import com.aweit.utils.UserContextHolder;
 
 @RestController
 @RequestMapping(value="v1/author/{authorId}/book")
 public class BookController {
 
+	private static final Logger logger = LoggerFactory.getLogger(BookController.class);
+	
 	@Autowired
 	private BookService bookService;
 
@@ -52,5 +60,11 @@ public class BookController {
 	@DeleteMapping(value="/{bookId}")
 	public ResponseEntity<String> deleteBook(@PathVariable("bookId") String bookId) {
 		return ResponseEntity.ok(bookService.deleteBook(bookId));
+	}
+	
+	@RequestMapping(value="/",method = RequestMethod.GET)
+	public List<Book> getBooks( @PathVariable("authorId") String authorId) throws TimeoutException {
+		logger.debug("BookController Correlation id: {}", UserContextHolder.getContext().getCorrelationId());
+		return bookService.getBooksByAuthor(authorId);
 	}
 }
