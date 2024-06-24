@@ -13,7 +13,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
-import com.aweit.filter.UserContextInterceptor;
+import com.aweit.utils.UserContextInterceptor;
 
 @SpringBootApplication
 @EnableDiscoveryClient

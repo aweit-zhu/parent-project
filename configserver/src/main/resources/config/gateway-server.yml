@@ -9,7 +9,7 @@ eureka:
     fetchRegistry: true
     serviceUrl:
       defaultZone: http://eurekaserver:8070/eureka/
-
+      
 spring:
   cloud:
     loadbalancer.ribbon.enabled: false
@@ -24,14 +24,15 @@ spring:
         - Path=/author/**
         filters:
         - RewritePath=/author/(?<path>.*), /$\{path}
+        - RemoveRequestHeader= Cookie,Set-Cookie
       - id: book-service
         uri: lb://book-service
         predicates:
         - Path=/book/**
         filters:
         - RewritePath=/book/(?<path>.*), /$\{path}
-        - AddResponseHeader=X-Response-Foo, Bar #測試 AddResponseHeader 功能
-
+        - RemoveRequestHeader= Cookie,Set-Cookie
+    
 management:
   endpoints:
     web:

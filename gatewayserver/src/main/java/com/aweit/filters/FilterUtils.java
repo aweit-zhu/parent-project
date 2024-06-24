@@ -10,9 +10,7 @@ import org.springframework.web.server.ServerWebExchange;
 public class FilterUtils {
 
 	public static final String CORRELATION_ID = "tmx-correlation-id";
-	public static final String AUTH_TOKEN = "tmx-auth-token";
-	public static final String USER_ID = "tmx-user-id";
-	public static final String AUTHOR_ID = "tmx-author-id";
+	public static final String AUTH_TOKEN = "Authorization";
 	public static final String PRE_FILTER_TYPE = "pre";
 	public static final String POST_FILTER_TYPE = "post";
 	public static final String ROUTE_FILTER_TYPE = "route";
@@ -25,12 +23,22 @@ public class FilterUtils {
 			return null;
 		}
 	}
-
+	
 	public ServerWebExchange setCorrelationId(ServerWebExchange ex, String id) {
 		return ex
 			.mutate()
 			.request(ex.getRequest().mutate().header(CORRELATION_ID, id).build())
 			.build();
+	}
+
+
+	public String getAuthToken(HttpHeaders requestHeaders) {
+		if (requestHeaders.get(AUTH_TOKEN) != null) {
+			List<String> header = requestHeaders.get(AUTH_TOKEN);
+			return header.stream().findFirst().get();
+		} else {
+			return null;
+		}
 	}
 
 }
