@@ -30,6 +30,7 @@ spring:
         - Path=/book/**
         filters:
         - RewritePath=/book/(?<path>.*), /$\{path}
+        - AddResponseHeader=X-Response-Foo, Bar #測試 AddResponseHeader 功能
 
 management:
   endpoints:

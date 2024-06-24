@@ -14,3 +14,7 @@
 #### 測試 Eureka
 
 	http://localhost:8070/
+
+#### 測試 gatewayserver 定義的路由
+
+	http://localhost:8072/actuator/gateway/routes
