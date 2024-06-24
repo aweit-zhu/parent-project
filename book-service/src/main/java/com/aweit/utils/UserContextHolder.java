@@ -1,5 +1,8 @@
 package com.aweit.utils;
 
+
+import org.apache.commons.codec.binary.Base64;
+import org.json.JSONObject;
 import org.springframework.util.Assert;
 
 public class UserContextHolder {
@@ -23,5 +26,4 @@ public class UserContextHolder {
 	public static final UserContext createEmptyContext() {
 		return new UserContext();
 	}
-	
 }

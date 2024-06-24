@@ -1,10 +1,10 @@
 package com.aweit.service.client;
 
+import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import com.aweit.model.Author;
 
@@ -12,12 +12,12 @@ import com.aweit.model.Author;
 @Component
 public class AuthorRestTemplateClient {
     @Autowired
-    RestTemplate restTemplate;
+    KeycloakRestTemplate restTemplate;
 
     public Author getAuthor(String authorId){
         ResponseEntity<Author> restExchange =
                 restTemplate.exchange(
-                        "http://author-service/v1/author/{authorId}",
+                		 "http://gateway:8072/author/v1/author/{authorId}",
                         HttpMethod.GET,
                         null, Author.class, authorId);
 

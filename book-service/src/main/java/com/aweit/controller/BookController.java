@@ -36,7 +36,7 @@ public class BookController {
 	public ResponseEntity<Book> getBook( @PathVariable("authorId") String authorId,
 			@PathVariable("bookId") String bookId) {
 
-		Book book = bookService.getBook(bookId, authorId, "feign");
+		Book book = bookService.getBook(bookId, authorId, "rest"); //feign 
 		book.add( 
 				linkTo(methodOn(BookController.class).getBook(authorId, book.getBookId())).withSelfRel(),
 				linkTo(methodOn(BookController.class).createBook(book)).withRel("createBook"),
